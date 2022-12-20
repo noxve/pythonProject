@@ -12,8 +12,9 @@ Post
    {% if poste %}
        <table>
            <tr>
+               <td>Автор</td>
                <td>Название</td>
-               <td>Дата публикации</td>
+               <td>Дата</td>
                <td>Статья</td>
                <td>Ссылки</td>
            </tr>
@@ -24,8 +25,17 @@ Post
                <td>{{ new.dateCreation|date:'M d Y' }}</td>
                <td><div>{{ new.text|censor|truncatewords:20 }}</div></td>
                <td><a href="{{ new.id }}" > Подробнее </a></td>
-               <td><a href="{{ new.id }}/edit/" > Изменить </a></td>
-               <td><a href="{{ new.id }}/delete/" > Удалить </a></td>
+
+               <td>
+                   {# А здесь доступ для каждой ссылки теперь будем проверять отдельно #}
+                   {% if perms.simpleapp.change_product %}
+                   <a href="{% url 'post_update' pk=new.id %}">Изменить</a>
+                   {% endif %}
+                   {% if perms.simpleapp.delete_product %}
+                   <a href="{% url 'post_delete' new.id %}">Удалить</a>
+                   {% endif %}
+               </td>
+
            </tr>
            {% endfor %}
        </table>
