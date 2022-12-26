@@ -27,3 +27,4 @@ class SignUpForm(UserCreationForm):
             "password1",
             "password2",
         )
+
