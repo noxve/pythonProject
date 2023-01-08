@@ -1,3 +1,4 @@
+
 import os
 from celery import Celery
 from celery.schedules import crontab
@@ -8,9 +9,10 @@ app = Celery('NewsPaper')
 app.config_from_object('django.conf:settings', namespace = 'CELERY')
 
 app.autodiscover_tasks()
+
 app.conf.beat_schedule = {
-    'when_week': {
-        'task': 'news.tasks.notify_weekly',
+    'when_creating_post': {
+        'task': 'news.tasks.notify_about_new_post',
         'schedule': 30,
     },
 }
@@ -22,4 +24,5 @@ app.conf.beat_schedule = {
         'schedule': crontab(hour=8, minute=0, day_of_week='monday'),
     },
 }
+
 
