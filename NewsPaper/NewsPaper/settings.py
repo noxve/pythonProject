@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-te$i^=24rmgjj*2-2%j%mf7_89hj4igw_=_f!g0(d^7g-r-58a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.localhost', '127.0.0.1', '[::1]']
 
 
 # Application definition
@@ -148,6 +148,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 LOGIN_REDIRECT_URL = "/news"
 
+
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
@@ -158,18 +159,16 @@ ACCOUNT_FORMS = {"signup": "accounts.forms.CustomSignupForm"}
 
 SITE_URL = 'http://127.0.0.1:8000'
 
-EMAIL_HOST = 'smtp.yandex.ru'  # адрес сервера Яндекс-почты для всех один и тот же
+EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')#Ставил свои данные всё работало  #
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 EMAIL_TIMEOUT = 60
 
-# формат даты, которую будет воспринимать наш задачник (вспоминаем модуль по фильтрам)
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 
-# если задача не выполняется за 25 секунд, то она автоматически снимается, можете поставить время побольше, но как правило, это сильно бьёт по производительности сервера
 APSCHEDULER_RUN_NOW_TIMEOUT = 25
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
@@ -183,10 +182,11 @@ CELERY_TIMEZONE = 'Europe/Moscow'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'cache_files'), # Указываем, куда будем сохранять кэшируемые файлы! Не забываем создать папку cache_files внутри папки с manage.py!
+        'LOCATION': os.path.join(BASE_DIR, 'cache_files'),
         'TIMEOUT': 30,
     }
 }
+
 
 LOGGING = {
     'version': 1,
@@ -201,15 +201,15 @@ LOGGING = {
     },
     'formatters': {
         'DEBUG': {
-            'format': '%{levelname}s %{asctime}s %{module}s %{message}s',
+            'format':'%{asctime}s %{levelname}s %{message}s',
             'style': '{',
         },
         'warning': {
-            'format': '%{levelname}s %{asctime}s %{module}s %{message}s %{pathname}d',
+            'format': '%{asctime}s %{levelname}s %{message}s %(pathname)s',
             'style': '{',
         },
         'error_and_critical': {
-            'format': '%{asctime}s %{levelname}s %{module}s %{message}s %{pathname}d %{exc_info}s',
+             'format': '%{asctime}s %{levelname}s %{message}s %(pathname)s %{exc_info}s',
             'style': '{',
         }
     },
@@ -218,6 +218,16 @@ LOGGING = {
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'DEBUG',
+        },
+        'console warning': {
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'warning',
+        },
+        'console error_and_critical': {
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'error_and_critical',
         },
         'general': {
             'filters': ['require_debug_true'],
@@ -236,7 +246,7 @@ LOGGING = {
             'filename': 'security.log',
         },
         'mail_admins': {
-            'filters': ['require_debug_false'],
+            'filters': ['require_debug_true'],
             'class': 'django.utils.log.AdminEmailHandler',
             'formatter': 'warning',
         }
@@ -244,28 +254,33 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'general'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['errors', 'mail_admins', 'general'],
-            'level': 'INFO',
+            'handlers': ['console_warning', 'errors', 'mail_admins', 'general'],
+            'level': 'WARNING',
+            'propagate': False,
         },
         'django.server': {
-            'handlers': ['errors', 'mail_admins', 'general'],
+            'handlers': ['errors', 'mail_admins'],
             'level': 'INFO',
+            'propagate': True,
         },
         'django.security': {
-            'handlers': ['security', 'general'],
+            'handlers': ['console_warning', 'console error_and_critical', 'security'],
             'level': 'INFO',
+            'propagate': False,
         },
         'django.template': {
-            'handlers': ['errors', 'general'],
+            'handlers': ['errors'],
             'level': 'INFO',
+            'propagate': True,
         },
         'django.db.backends': {
-            'handlers': ['errors', 'general'],
-            'level': 'INFO',
+            'handlers': ['errors',],
+            'level': 'ERROR',
+            'propagate': True,
         },
     },
 }
