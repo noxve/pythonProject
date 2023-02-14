@@ -148,6 +148,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 LOGIN_REDIRECT_URL = "/news"
 
+ADMINS = [('admin', os.getenv('DEFAULT_FROM_EMAIL'))]
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
@@ -201,54 +202,65 @@ LOGGING = {
     },
     'formatters': {
         'DEBUG': {
-            'format':'%{asctime}s %{levelname}s %{message}s',
+            'format': '%{asctime}s %{levelname}s %{message}s',
             'style': '{',
         },
-        'warning': {
+        'si_warning': {
             'format': '%{asctime}s %{levelname}s %{message}s %(pathname)s',
             'style': '{',
         },
         'error_and_critical': {
-             'format': '%{asctime}s %{levelname}s %{message}s %(pathname)s %{exc_info}s',
+            'format': '%{asctime}s %{levelname}s %{message}s %(pathname)s %{exc_info}s',
             'style': '{',
-        }
+        },
+        'general': {
+            'format': '{asctime} | {levelname} | {module} | {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'console': {
+            'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'DEBUG',
         },
-        'console warning': {
+        'console_si_warning': {
+            'level': 'WARNING',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
-            'formatter': 'warning',
+            'formatter': 'si_warning',
         },
-        'console error_and_critical': {
+        'console_error_and_critical': {
+            'level': 'ERROR',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'error_and_critical',
         },
         'general': {
+            'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'formatter': 'DEBUG',
+            'formatter': 'general',
             'filename': 'general.log',
         },
         'errors': {
+            'level': 'ERROR',
             'class': 'logging.FileHandler',
             'formatter': 'error_and_critical',
             'filename': 'errors.log',
         },
         'security': {
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'error_and_critical',
             'filename': 'security.log',
         },
         'mail_admins': {
+            'level': 'ERROR',
             'filters': ['require_debug_true'],
             'class': 'django.utils.log.AdminEmailHandler',
-            'formatter': 'warning',
+            'formatter': 'si_warning',
         }
     },
     'loggers': {
@@ -258,7 +270,7 @@ LOGGING = {
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['console_warning', 'errors', 'mail_admins', 'general'],
+            'handlers': ['console_si_warning', 'console_error_and_critical', 'errors', 'mail_admins', 'general'],
             'level': 'WARNING',
             'propagate': False,
         },
@@ -268,7 +280,7 @@ LOGGING = {
             'propagate': True,
         },
         'django.security': {
-            'handlers': ['console_warning', 'console error_and_critical', 'security'],
+            'handlers': ['console_si_warning', 'console_error_and_critical', 'security'],
             'level': 'INFO',
             'propagate': False,
         },
@@ -278,8 +290,8 @@ LOGGING = {
             'propagate': True,
         },
         'django.db.backends': {
-            'handlers': ['errors',],
-            'level': 'ERROR',
+            'handlers': ['errors'],
+            'level': 'INFO',
             'propagate': True,
         },
     },
